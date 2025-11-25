@@ -1,0 +1,198 @@
+{
+  "info": {
+    "name": "Student Management CRUD API",
+    "_postman_id": "ec6a077e-4a5e-4dd3-9f03-5b86e1a4ad0f",
+    "description": "Postman collection for Student Management CRUD API covering core endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Student",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Aisha Verma\",\n  \"email\": \"aisha@example.com\",\n  \"phone\": \"+91-9876543210\",\n  \"branch\": \"Computer Science\",\n  \"yop\": 2023\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "students"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Student By Id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "students",
+            "{{studentId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "List Students With Filters",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/students?branch=Computer%20Science&yop=2023&page=0&size=5&sort=fullName,asc",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "students"
+          ],
+          "query": [
+            {
+              "key": "branch",
+              "value": "Computer Science"
+            },
+            {
+              "key": "yop",
+              "value": "2023"
+            },
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "5"
+            },
+            {
+              "key": "sort",
+              "value": "fullName,asc"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Student",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Aisha Verma\",\n  \"email\": \"aisha@example.com\",\n  \"phone\": \"+91-9876543210\",\n  \"branch\": \"Information Technology\",\n  \"yop\": 2024\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "students",
+            "{{studentId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Patch Student",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"+91-9000000000\",\n  \"active\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "students",
+            "{{studentId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Soft Delete Student",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "students",
+            "{{studentId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Hard Delete Student",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/api/students/{{studentId}}?hard=true",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "students",
+            "{{studentId}}"
+          ],
+          "query": [
+            {
+              "key": "hard",
+              "value": "true"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "studentId",
+      "value": "1"
+    }
+  ]
+}
+
