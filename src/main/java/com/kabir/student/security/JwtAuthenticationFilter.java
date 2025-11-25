@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			String token = resolveToken(request);
 			if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
 				var authentication = jwtTokenProvider.getAuthentication(token);
-				if (authentication instanceof UsernamePasswordAuthenticationToken authToken) {
+				if (authentication instanceof AbstractAuthenticationToken authToken) {
 					authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 				}
