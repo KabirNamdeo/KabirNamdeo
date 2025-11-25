@@ -2,10 +2,64 @@
   "info": {
     "name": "Student Management CRUD API",
     "_postman_id": "ec6a077e-4a5e-4dd3-9f03-5b86e1a4ad0f",
-    "description": "Postman collection for Student Management CRUD API covering core endpoints.",
+    "description": "Postman collection for Student Management CRUD API covering auth and secured student endpoints.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
+    {
+      "name": "Signup",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Demo User\",\n  \"email\": \"demo@example.com\",\n  \"password\": \"Password!1\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/signup",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "signup"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"demo@example.com\",\n  \"password\": \"Password!1\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
     {
       "name": "Create Student",
       "request": {
@@ -14,6 +68,10 @@
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
           }
         ],
         "body": {
@@ -33,10 +91,15 @@
       }
     },
     {
-      "name": "Get Student By Id",
+      "name": "Get Student",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
         "url": {
           "raw": "{{baseUrl}}/api/students/{{studentId}}",
           "host": [
@@ -51,9 +114,15 @@
       }
     },
     {
-      "name": "List Students With Filters",
+      "name": "List Students",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
         "url": {
           "raw": "{{baseUrl}}/api/students?branch=Computer%20Science&yop=2023&page=0&size=5&sort=fullName,asc",
           "host": [
@@ -96,6 +165,10 @@
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
           }
         ],
         "body": {
@@ -123,6 +196,10 @@
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
           }
         ],
         "body": {
@@ -146,6 +223,12 @@
       "name": "Soft Delete Student",
       "request": {
         "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
         "url": {
           "raw": "{{baseUrl}}/api/students/{{studentId}}",
           "host": [
@@ -163,6 +246,12 @@
       "name": "Hard Delete Student",
       "request": {
         "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
         "url": {
           "raw": "{{baseUrl}}/api/students/{{studentId}}?hard=true",
           "host": [
@@ -183,7 +272,6 @@
       }
     }
   ],
-  "event": [],
   "variable": [
     {
       "key": "baseUrl",
@@ -192,6 +280,10 @@
     {
       "key": "studentId",
       "value": "1"
+    },
+    {
+      "key": "authToken",
+      "value": ""
     }
   ]
 }

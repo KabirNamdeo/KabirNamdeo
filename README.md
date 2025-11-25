@@ -35,6 +35,8 @@ Copy `.env.example` to `.env` and adjust values:
 | `SPRING_JPA_HIBERNATE_DDL_AUTO` | Schema mode | update |
 | `MYSQL_ROOT_PASSWORD` | Docker MySQL root password | change-me |
 | `MYSQL_DATABASE` | Docker MySQL schema | student_db |
+| `APP_JWT_SECRET` | HMAC secret for JWT signing | `ChangeMeToAStrong...` |
+| `APP_JWT_EXPIRATION` | Token lifetime in ms | `3600000` |
 
 ## Local Development
 ```bash
@@ -59,8 +61,27 @@ When `dev` profile is active, `DataInitializer` seeds three demo students exactl
 - **Integration Tests**: `@SpringBootTest` + MockMvc backed by a real MySQL Testcontainer.
 - Run everything with `mvn test` (Docker Desktop or compatible runtime must be running for Testcontainers; when Docker is unavailable the integration tests are automatically skipped).
 
+## Authentication
+- Endpoints:  
+  - `POST /api/auth/signup` – register a user and receive a token  
+  - `POST /api/auth/login` – exchange credentials for a JWT  
+- Default dev credentials (seeded when `dev` profile is active): `admin@college.local / Admin@123`
+- Include the token in subsequent calls: `Authorization: Bearer <token>`
+
+```bash
+# Signup
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"fullName":"Demo User","email":"demo@example.com","password":"Password!1"}' | jq -r '.token')
+
+# Login (if already registered)
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"demo@example.com","password":"Password!1"}' | jq -r '.token')
+```
+
 ## REST API
-Base URL: `/api/students`
+Base URL: `/api/students` (all secured – supply `Authorization: Bearer <token>`)
 
 | Method | Path | Description |
 | --- | --- | --- |
@@ -77,21 +98,26 @@ Base URL: `/api/students`
 # Create
 curl -X POST http://localhost:8080/api/students \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{"fullName":"Aisha Verma","email":"aisha@example.com","phone":"+91-9000011111","branch":"CSE","yop":2023}'
 
 # List with filters & pagination
-curl "http://localhost:8080/api/students?branch=CSE&yop=2023&page=0&size=5&sort=fullName,desc"
+curl "http://localhost:8080/api/students?branch=CSE&yop=2023&page=0&size=5&sort=fullName,desc" \
+  -H "Authorization: Bearer $TOKEN"
 
 # PATCH
 curl -X PATCH http://localhost:8080/api/students/1 \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{"phone":"+91-9000099999","active":true}'
 
 # Soft delete
-curl -X DELETE http://localhost:8080/api/students/1
+curl -X DELETE http://localhost:8080/api/students/1 \
+  -H "Authorization: Bearer $TOKEN"
 
 # Hard delete
-curl -X DELETE "http://localhost:8080/api/students/1?hard=true"
+curl -X DELETE "http://localhost:8080/api/students/1?hard=true" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ### Response (example)
@@ -132,7 +158,8 @@ Import `postman/StudentManagementCrudAPI.postman_collection.json` and set `baseU
 - `StudentSpecifications` + `PagedResponse` handle filters, pagination, and sorting in a reusable manner.
 - Soft delete is enforced in queries via specification; hard delete opt-in through query flag.
 - CORS wide-open for sandboxing; tighten before production.
-- `DataInitializer` only runs on `dev` profile to keep prod/test clean.
+- `DataInitializer` seeds demo students plus a default admin user in `dev` for easy logins.
+- Stateless JWT security protects every endpoint except `/api/auth/**` and `/actuator`.
 
 ## Deployment Notes
 - Build image: `docker build -t student-management-api .`
@@ -148,5 +175,5 @@ docker compose up --build  # Run MySQL + API together
 
 ## Next Steps
 - Optional pagination metadata caching layer (Redis) for heavy list usage.
-- Plug authentication/authorization once requirements are available.
+- Wire RBAC/permissions if different roles should have limited access.
 
