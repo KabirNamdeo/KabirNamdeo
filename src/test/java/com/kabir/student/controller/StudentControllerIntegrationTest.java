@@ -24,8 +24,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kabir.student.StudentManagementCrudApiApplication;
 import com.kabir.student.support.AbstractMySqlContainerTest;
 import com.kabir.student.dto.StudentRequest;
+import com.kabir.student.dto.SignupRequest;
 import com.kabir.student.model.entity.Student;
 import com.kabir.student.repository.StudentRepository;
+import com.kabir.student.repository.UserRepository;
 
 @SpringBootTest(classes = StudentManagementCrudApiApplication.class)
 @AutoConfigureMockMvc
@@ -44,9 +46,16 @@ class StudentControllerIntegrationTest extends AbstractMySqlContainerTest {
 	@Autowired
 	private StudentRepository studentRepository;
 
+	@Autowired
+	private UserRepository userRepository;
+
+	private String authToken;
+
 	@BeforeEach
-	void cleanDb() {
+	void cleanDb() throws Exception {
 		studentRepository.deleteAll();
+		userRepository.deleteAll();
+		authToken = performSignupAndReturnToken();
 	}
 
 	@Test
@@ -54,6 +63,7 @@ class StudentControllerIntegrationTest extends AbstractMySqlContainerTest {
 		StudentRequest request = baseRequest();
 
 		String responseBody = mockMvc.perform(post("/api/students")
+				.header("Authorization", "Bearer " + authToken)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
 				.andExpect(status().isCreated())
@@ -64,7 +74,8 @@ class StudentControllerIntegrationTest extends AbstractMySqlContainerTest {
 
 		Long studentId = objectMapper.readTree(responseBody).path("id").asLong();
 
-		mockMvc.perform(get("/api/students/{id}", studentId))
+		mockMvc.perform(get("/api/students/{id}", studentId)
+				.header("Authorization", "Bearer " + authToken))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.id", is(studentId.intValue())))
 				.andExpect(jsonPath("$.email", is(request.getEmail())));
@@ -91,6 +102,7 @@ class StudentControllerIntegrationTest extends AbstractMySqlContainerTest {
 				.build());
 
 		mockMvc.perform(get("/api/students")
+				.header("Authorization", "Bearer " + authToken)
 				.param("branch", "CSE")
 				.param("yop", "2023")
 				.param("page", "0")
@@ -115,6 +127,7 @@ class StudentControllerIntegrationTest extends AbstractMySqlContainerTest {
 				.build());
 
 		mockMvc.perform(patch("/api/students/{id}", student.getId())
+				.header("Authorization", "Bearer " + authToken)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""
 						{
@@ -125,10 +138,12 @@ class StudentControllerIntegrationTest extends AbstractMySqlContainerTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.phone", is("+91-9000000123")));
 
-		mockMvc.perform(delete("/api/students/{id}", student.getId()))
+		mockMvc.perform(delete("/api/students/{id}", student.getId())
+				.header("Authorization", "Bearer " + authToken))
 				.andExpect(status().isNoContent());
 
-		mockMvc.perform(get("/api/students/{id}", student.getId()))
+		mockMvc.perform(get("/api/students/{id}", student.getId())
+				.header("Authorization", "Bearer " + authToken))
 				.andExpect(status().isNotFound());
 	}
 
@@ -152,6 +167,7 @@ class StudentControllerIntegrationTest extends AbstractMySqlContainerTest {
 				.build();
 
 		mockMvc.perform(put("/api/students/{id}", student.getId())
+				.header("Authorization", "Bearer " + authToken)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updateRequest)))
 				.andExpect(status().isOk())
@@ -167,6 +183,22 @@ class StudentControllerIntegrationTest extends AbstractMySqlContainerTest {
 				.branch("CSE")
 				.yop(2023)
 				.build();
+	}
+
+	private String performSignupAndReturnToken() throws Exception {
+		SignupRequest signupRequest = new SignupRequest();
+		signupRequest.setFullName("Test User");
+		signupRequest.setEmail("test.user@example.com");
+		signupRequest.setPassword("Password!1");
+
+		String body = mockMvc.perform(post("/api/auth/signup")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(signupRequest)))
+				.andExpect(status().isCreated())
+				.andReturn()
+				.getResponse()
+				.getContentAsString();
+		return objectMapper.readTree(body).path("token").asText();
 	}
 }
 

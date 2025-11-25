@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -57,6 +58,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<Object> handleIllegalArgument(IllegalArgumentException ex, WebRequest request) {
 		return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request, null);
+	}
+
+	@ExceptionHandler(BadCredentialsException.class)
+	public ResponseEntity<Object> handleBadCredentials(BadCredentialsException ex, WebRequest request) {
+		return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), request, null);
 	}
 
 	@ExceptionHandler(Exception.class)
